@@ -1,219 +1,54 @@
-# MLHR - MediaPipe Hand Recognition & Accessibility Tools
+# ML Hand Gesture Control for Keyboard and Mouse
 
-A collection of computer vision and accessibility tools using MediaPipe for hand tracking and gesture recognition, designed to run on multi-core systems for optimal performance.
+This project enables intuitive control of your computer's keyboard and mouse through hand gestures detected via a webcam, leveraging MediaPipe for hand tracking and pynput for input simulation.
 
-## 🚀 Features
+## Features
 
-### Hand Tracking Scripts
-- **Real-time hand landmark detection** using MediaPipe
-- **Multi-core parallel processing** for maximum performance
-- **Handedness-aware finger detection** (left/right hand thumb logic)
-- **Exponential moving average smoothing** for stable landmark tracking
-- **Visual feedback** with glowing fingertips and FPS overlay
-- **Palm-facing camera detection** for natural interaction
+- **Radial Gestures**: Control directional inputs (UP, DOWN, LEFT, RIGHT) by moving your index finger within a dynamic radial zone.
+- **Index-Thumb Touch**: Tap your index finger and thumb together to simulate a single `ENTER` key press.
+- **Fist Detection for Action Circle**: Use a second hand to form a fist. This activates an "Action Circle" on screen. Move your primary hand (index finger) into this circle to trigger a single `ENTER` key press.
+- **Dynamic Zone Radius**: The radial gesture zones dynamically adjust based on hand movement, providing a more fluid control experience.
+- **Slap Detection**: Quickly bringing your index and middle fingers together can trigger `ESC` (to exit focus mode) or `TAB` (to enter focus mode), enabling quick context switching.
+- **Visual Feedback**: Real-time visualization of hand landmarks, gesture zones, and action circles directly on the webcam feed.
 
-### Accessibility Integration
-- **AT-SPI integration** for desktop accessibility control
-- **Focus element tracking** for UI automation
-- **Gesture-to-action mapping** foundation
+## Setup
 
-## 📁 Project Structure
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/yourusername/mlhr.git
+    cd mlhr
+    ```
+2.  **Create a virtual environment** (recommended):
+    ```bash
+    python3 -m venv mlhr_env
+    source mlhr_env/bin/activate
+    ```
+3.  **Install dependencies**:
+    ```bash
+    pip install opencv-python mediapipe pynput
+    ```
 
-```
-mlhr/
-├── hand_tracking.py              # Original hand tracking implementation
-├── hand_tracking_parallel.py     # Multi-core optimized version
-├── accessibility.py              # AT-SPI accessibility controller
-├── requirements.txt              # Python dependencies
-├── get-pip.py                   # pip bootstrapper
-└── README.md                    # This file
-```
+## Usage
 
-## 🛠 Installation
+1.  **Run the script**:
+    ```bash
+    python hand_tracking.py
+    ```
+2.  **Webcam Feed**: A window will open displaying your webcam feed with hand tracking overlays.
+3.  **Quit**: Press `Q` to exit the application.
 
-### Prerequisites
-- Python 3.10+
-- Linux (tested on Kali Linux)
-- Webcam/camera device
+## Gesture Guide
 
-### Setup
-1. **Clone or navigate to the project directory**
-   ```bash
-   cd /path/to/mlhr
-   ```
+-   **Radial Navigation (Primary Hand - Index Finger)**:
+    -   Move your index finger up, down, left, or right relative to the dynamic center point to trigger corresponding arrow keys.
+-   **Enter (Primary Hand - Index Finger & Thumb)**:
+    -   Touch your index finger tip to your thumb tip to send a single `ENTER` key press.
+-   **Action Circle (Secondary Hand - Fist, then Primary Hand)**:
+    -   Form a **fist** with your **second hand** to activate an orange "ACTION" circle on screen.
+    -   Move your **primary hand's index finger** into this orange circle to trigger a single `ENTER` key press.
+-   **Focus Mode Toggle (Primary Hand - Index & Middle Finger "Slap")**:
+    -   Quickly bring your index and middle fingers together (a "slap" gesture) with your primary hand:
+        -   First slap: Sends `ESC` and turns "FOCUS: OFF".
+        -   Second consecutive slap within a time window: Sends `TAB` and turns "FOCUS: ON".
 
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-   Or if using a virtual environment:
-   ```bash
-   # Activate your virtual environment first
-   pip install -r requirements.txt
-   ```
-
-### Required Packages
-- `mediapipe==0.10.14` - Google's ML pipeline for hand tracking
-- `opencv-python==4.10.0.84` - Computer vision library
-- `numpy` - Numerical computing
-- `pyautogui` - GUI automation (for accessibility features)
-
-## 🎯 Usage
-
-### Hand Tracking (Parallel Version - Recommended)
-```bash
-python hand_tracking_parallel.py
-```
-
-**Features:**
-- Automatically detects and utilizes all CPU cores
-- Threaded camera capture for reduced latency
-- Parallel MediaPipe inference
-- Async drawing for smooth UI
-- Exponential moving average landmark smoothing
-- 1280x720 HD capture with 1.5x display scaling
-
-**Controls:**
-- Press `q` to quit
-- Shows FPS, finger count per hand, and visual landmarks
-
-### Hand Tracking (Original Version)
-```bash
-python hand_tracking.py
-```
-
-**Features:**
-- Single-threaded implementation
-- Basic landmark smoothing
-- Core functionality without parallel optimization
-
-### Accessibility Controller
-```bash
-python accessibility.py
-```
-
-**Features:**
-- Monitors focused desktop elements using AT-SPI
-- Foundation for gesture-to-UI-action mapping
-- Currently displays focused application names
-
-## 🔧 Configuration
-
-### Hand Tracking Parameters (in script constants)
-```python
-CAM_INDEX = 0                    # Camera device index
-MODEL_COMPLEXITY = 1            # MediaPipe model complexity (0-2)
-MAX_NUM_HANDS = 2               # Maximum hands to track
-MIN_DET_CONF = 0.5              # Detection confidence threshold
-MIN_TRACK_CONF = 0.5            # Tracking confidence threshold
-SMOOTHING_ALPHA = 0.3           # EMA smoothing factor (0.1-0.5)
-FRAME_WIDTH = 1280              # Camera resolution width
-FRAME_HEIGHT = 720              # Camera resolution height
-DISPLAY_SCALE = 1.5             # UI display scaling factor
-```
-
-### Performance Tuning
-- **CPU Cores**: Automatically detected and utilized
-- **OpenCV Threads**: Set to use all available cores
-- **Queue Size**: Configured for latest-frame processing
-- **ThreadPool**: Sized to match CPU core count
-
-## 🎨 Visual Features
-
-### Hand Landmarks
-- **21 landmark points** per detected hand
-- **Hand connections** visualization
-- **Color-coded overlays** for different hands
-
-### Finger Detection
-- **Thumb**: Handedness-aware (left/right logic)
-- **Other fingers**: Y-coordinate based extension detection
-- **Real-time counting**: "Left 3/5" or "Right 4/5" display
-
-### Special Effects
-- **Glowing fingertips**: Cyan-colored circles at finger tips
-- **FPS counter**: Real-time performance monitoring
-- **Status messages**: "No hands detected" when appropriate
-
-## 🏗 Architecture
-
-### Parallel Processing Pipeline
-1. **Camera Thread**: Continuous frame capture → queue
-2. **Inference Thread Pool**: Parallel MediaPipe processing
-3. **Drawing Thread**: Async rendering and display
-4. **Main Coordinator**: Queue management and thread synchronization
-
-### Data Flow
-```
-Camera → Frame Queue → ThreadPool(Inference) → Display Queue → Drawing Thread → Screen
-```
-
-## 🔍 Technical Details
-
-### Landmark Smoothing
-- **Exponential Moving Average (EMA)**: Reduces jitter while maintaining responsiveness
-- **Per-hand tracking**: Independent smoothers for multiple hands
-- **Real-time updates**: No frame buffering delays
-
-### Handedness Detection
-- **MediaPipe classification**: Automatic left/right determination
-- **Thumb logic**: Mirror-image detection for natural thumb extension
-- **Confidence thresholding**: Fallback detection for uncertain classifications
-
-### Performance Optimizations
-- **Multi-threading**: Parallel camera, inference, and drawing
-- **Latest-frame processing**: Always work with most recent camera input
-- **Memory efficiency**: Minimal image copying and queue management
-- **CPU utilization**: All cores engaged for maximum throughput
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**"ModuleNotFoundError: No module named 'mediapipe'"**
-```bash
-pip install mediapipe==0.10.14
-```
-
-**Camera not found**
-- Check `CAM_INDEX` in script (usually 0 for built-in webcam)
-- Ensure camera permissions are granted
-
-**Low FPS**
-- Reduce `FRAME_WIDTH`/`FRAME_HEIGHT` for lower resolution
-- Increase `SMOOTHING_ALPHA` for less processing
-- Check CPU usage and available cores
-
-**Hand detection issues**
-- Ensure good lighting
-- Position hands clearly in frame
-- Adjust `MIN_DET_CONF` if needed
-- Verify palm is facing camera
-
-### Virtual Environment
-If using a virtual environment, make sure it's activated before installing dependencies.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Test on multi-core systems
-4. Submit a pull request
-
-## 📄 License
-
-This project is open-source. See individual script headers for license information.
-
-## 🔗 Dependencies
-
-- [MediaPipe](https://mediapipe.dev/) - ML pipeline framework
-- [OpenCV](https://opencv.org/) - Computer vision library
-- [NumPy](https://numpy.org/) - Scientific computing
-- [PyAutoGUI](https://pyautogui.readthedocs.io/) - GUI automation
-- [AT-SPI](https://wiki.gnome.org/Accessibility/AT-SPI2) - Accessibility framework
-
----
-
-**Note**: This project is designed for Linux environments and has been tested on Kali Linux. Performance may vary on different systems and hardware configurations.
-# mlhr
+Enjoy controlling your computer with gestures!
